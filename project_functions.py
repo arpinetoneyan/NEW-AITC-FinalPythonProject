@@ -70,7 +70,6 @@ def drop_na_line(df: pd.DataFrame, *columns) -> pd.DataFrame:
     return df
 
 
-
 def make_card(func):
     """
     Decorator -
@@ -239,7 +238,6 @@ def get_crypto_main_info(df, crypto, price_decimals=1, change_decimals=1):
     st.write(f"No data for {crypto!r}")
     return
 
-
   # get no number fields
   name = crypto_df['name'].iloc[0]
   symbol = crypto_df['symbol'].iloc[0]
@@ -277,9 +275,9 @@ def get_crypto_main_info(df, crypto, price_decimals=1, change_decimals=1):
   return
 
 
-def plot_crypto_field(df_main, start_date, end_date, *cryptos, field='price_usd_num', f_name='Price (USD)', figsize=(10, 6)):   #, date_format=None):
+def plot_crypto_field(df_main, start_date, end_date, *cryptos, field='price_usd_num', f_name='Price (USD)', figsize=(10, 6)):
     """
-    Plots price of cryptos in USD and displays the figure in Streamlit.
+    Plots the price of cryptos in USD and displays the figure in Streamlit.
     - df: dataframe with columns 'timestamp', 'name', 'price_usd_num'
     - cryptos: one or more crypto names (strings)
     - figsize: tuple for figure size
@@ -317,42 +315,19 @@ def plot_crypto_field(df_main, start_date, end_date, *cryptos, field='price_usd_
     # rotate x ticks for readability
     plt.xticks(rotation=30, ha='right')
 
-    # optional nicer date formatting
-    # if date_format:
-    #     ax.xaxis.set_major_locator(AutoDateLocator())
-    #     ax.xaxis.set_major_formatter(DateFormatter(date_format))
-
     plt.tight_layout()
 
-    # Display in Streamlit
-    st.pyplot(fig)
+    st.pyplot(fig)      # Display in Streamlit
 
-    # close figure to free memory / avoid duplicate plotting
-    plt.close(fig)
+    plt.close(fig)      # close figure to free memory
 
     return fig
 
-def countplot_top_n_by_name(df: pd.DataFrame, col: str, n: int):
+def count_plot_top_n_by_name(df: pd.DataFrame, col: str, n: int):
     """
     Plots Count Plot for top N cryptocurrencies by col by count
     """
-    # plt.figure(figsize=(12, 6))
-    # top_n = df[col].value_counts().head(n).index
-    # ax = sns.countplot(data=df[df[col].isin(top_n)], y=col, order=top_n, color="green")
-    # plt.title(f"Top {n} Cryptocurrencies by Count")
-    # plt.xlabel('Count')
-    # plt.ylabel('Cryptocurrency ' + col)
-    # #lables on bars = count
-    # # for container in ax.containers:
-    # #     ax.bar_label(container, label_type='center', color='white', fontsize=12)
-    #
-    # for container in ax.containers:
-    #     if isinstance(container, BarContainer):
-    #         ax.bar_label(container, label_type='center', color='white', fontsize=12)
-    #
-    # plt.tight_layout()
-    # st.pyplot(fig)
-    # return
+
     if col not in df.columns:
         st.error(f"Column {col!r} not found in DataFrame")
         return None

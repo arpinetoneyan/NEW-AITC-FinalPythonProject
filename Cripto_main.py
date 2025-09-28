@@ -22,12 +22,11 @@ df_crypto['chg_24h_num'] = pf.transform_percent_str_to_num(df_crypto['chg_24h'])
 df_crypto['chg_7d_num'] = pf.transform_percent_str_to_num(df_crypto['chg_7d'])
 na_list = ['name','price_usd_num', 'vol_24h_num', 'market_cap_num', 'total_vol_num', 'chg_24h_num', 'chg_7d_num']
 df_crypto = pf.drop_na_line(df_crypto, *na_list)
-# print(df_crypto.shape)
-# print(df_crypto.isna().sum())
 
 #------------------------------------define time start and end#------------------------------------
 max_date = df_crypto['timestamp'].max().date()
 min_date = df_crypto['timestamp'].min().date()
+
 #------------------------------------streamlit interface#------------------------------------
 st.title("Cryptocurrency Market Insights")
 col1, col2, col3, col4 = st.columns(4)
@@ -62,7 +61,7 @@ bitcoin = st.checkbox("Exclude Top 1")
 action_top = st.selectbox("Choose parameter", options=action_options_list)
 if st.button("Get Info about TOP"):
     top_crypto_list = pf.get_top_crypto_list(df_crypto, int(top_n), column_library[action_top], bitcoin)
-    pf.plot_crypto_field(df_crypto, *top_crypto_list, field=column_library[action_top], f_name=action_top)
+    pf.plot_crypto_field(df_crypto, min_date, max_date, *top_crypto_list, field=column_library[action_top], f_name=action_top)
 
 
 #---------------------Get info about crypto BLOCK-------------------
@@ -93,14 +92,7 @@ if action == "Plot":
 
 
 #print(df_crypto.head())
-# ******************************** Count Plot for Top n Cryptocurrencies by Count ***********************************
+# ******************************** Count Plot for Top N Cryptocurrencies by Count ***********************************
 
 st.title("Top cryptos by count")
-pf.countplot_top_n_by_name(df_crypto, 'name', 20)
-
-
-
-
-
-
-
+pf.count_plot_top_n_by_name(df_crypto, 'name', 20)
