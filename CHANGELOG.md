@@ -1,4 +1,7 @@
 # [1.0]
+### [1.1] - 28-09-2025
+ - Get info about crypto with time for plot
+
 
 ### [1.0] - 28-09-2025
  - top 10 block

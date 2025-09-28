@@ -5,6 +5,7 @@ import streamlit as st
 import seaborn as sns
 import math
 from functools import wraps
+from datetime import datetime
 
 def transform_string_to_datetime(sr: pd.Series) -> pd.Series:
     """
@@ -60,36 +61,15 @@ def transform_percent_str_to_num(sr: pd.Series) -> pd.Series:
     )
 
 
-def drop_na_line(df: pd.DataFrame, col: str) -> pd.DataFrame:
+def drop_na_line(df: pd.DataFrame, *columns) -> pd.DataFrame:
     """
-    Deletes from dataframe lines, for which the value of column col is NaN
+    Deletes from dataframe lines, for which the value of column is NaN
     """
-    return df.dropna(subset=[col])
+    for col in columns:
+        df = df.dropna(subset=[col])
+    return df
 
-def countplot_top_n_by_name(df: pd.DataFrame, col: str, n: int):
-    """
-    Plots Count Plot for top N cryptocurrencies by col by count
-    """
-    plt.figure(figsize=(12, 6))
-    top_n = df[col].value_counts().head(n).index
-    ax = sns.countplot(data=df[df[col].isin(top_n)], y=col, order=top_n, color="green")
-    plt.title(f"Top {n} Cryptocurrencies by Count")
-    plt.xlabel('Count')
-    plt.ylabel('Cryptocurrency ' + col)
-    #lables on bars = count
-    # for container in ax.containers:
-    #     ax.bar_label(container, label_type='center', color='white', fontsize=12)
 
-    for container in ax.containers:
-        if isinstance(container, BarContainer):
-            ax.bar_label(container, label_type='center', color='white', fontsize=12)
-
-    plt.tight_layout()
-    plt.show()
-
-    # for name in top_n:
-    #     print(f"{name}: {df_crypto[df_crypto[col] == name].shape[0]}")
-    return
 
 def make_card(func):
     """
@@ -196,11 +176,12 @@ def short_format_num(num):
     return f"{num:.1f}P"
 
 def get_crypto_list(df):
+  #print(df['name'].unique())
   return df['name'].unique()
 
 import pandas as pd
 
-def get_top_crypto_list(df, n=10, by="market_cap_num"):
+def get_top_crypto_list(df, n=10, by="market_cap_num", top1=True):
     """
     Return top-n cryptos from df sorted by column `by` (default: market_cap_num).
     - df: pandas DataFrame
@@ -221,6 +202,9 @@ def get_top_crypto_list(df, n=10, by="market_cap_num"):
         .drop_duplicates(subset=["name"])
         .head(n)["name"].tolist()
     )
+
+    if top1:
+        return top_names[1:]
     return top_names
 
 
@@ -293,7 +277,7 @@ def get_crypto_main_info(df, crypto, price_decimals=1, change_decimals=1):
   return
 
 
-def plot_crypto_field(df, *cryptos, field='price_usd_num', f_name='Price (USD)', figsize=(10, 6)):   #, date_format=None):
+def plot_crypto_field(df_main, start_date, end_date, *cryptos, field='price_usd_num', f_name='Price (USD)', figsize=(10, 6)):   #, date_format=None):
     """
     Plots price of cryptos in USD and displays the figure in Streamlit.
     - df: dataframe with columns 'timestamp', 'name', 'price_usd_num'
@@ -301,6 +285,11 @@ def plot_crypto_field(df, *cryptos, field='price_usd_num', f_name='Price (USD)',
     - figsize: tuple for figure size
     - date_format: optional strftime format for x-axis (e.g. '%Y-%m-%d')
     """
+    start_datetime = datetime.combine(start_date, datetime.min.time())
+    end_datetime = datetime.combine(end_date, datetime.max.time())
+
+    df = df_main[(df_main['timestamp']>=start_datetime) & (df_main['timestamp']<=end_datetime)]
+
     fig, ax = plt.subplots(figsize=figsize)
 
     plotted = False
@@ -341,4 +330,55 @@ def plot_crypto_field(df, *cryptos, field='price_usd_num', f_name='Price (USD)',
     # close figure to free memory / avoid duplicate plotting
     plt.close(fig)
 
+    return fig
+
+def countplot_top_n_by_name(df: pd.DataFrame, col: str, n: int):
+    """
+    Plots Count Plot for top N cryptocurrencies by col by count
+    """
+    # plt.figure(figsize=(12, 6))
+    # top_n = df[col].value_counts().head(n).index
+    # ax = sns.countplot(data=df[df[col].isin(top_n)], y=col, order=top_n, color="green")
+    # plt.title(f"Top {n} Cryptocurrencies by Count")
+    # plt.xlabel('Count')
+    # plt.ylabel('Cryptocurrency ' + col)
+    # #lables on bars = count
+    # # for container in ax.containers:
+    # #     ax.bar_label(container, label_type='center', color='white', fontsize=12)
+    #
+    # for container in ax.containers:
+    #     if isinstance(container, BarContainer):
+    #         ax.bar_label(container, label_type='center', color='white', fontsize=12)
+    #
+    # plt.tight_layout()
+    # st.pyplot(fig)
+    # return
+    if col not in df.columns:
+        st.error(f"Column {col!r} not found in DataFrame")
+        return None
+
+    # get top n
+    top_n = df[col].value_counts().head(n).index
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    sns.countplot(
+        data=df[df[col].isin(top_n)],
+        y=col,
+        order=top_n,
+        color="green",
+        ax=ax
+    )
+
+    ax.set_title(f"Top {n} by Count")
+    ax.set_xlabel("Count")
+    ax.set_ylabel(col)
+
+    # labels on bars
+    for container in ax.containers:
+        if isinstance(container, BarContainer):
+            ax.bar_label(container, label_type="center", color="white", fontsize=12)
+
+    fig.tight_layout()
+    st.pyplot(fig)
     return fig
