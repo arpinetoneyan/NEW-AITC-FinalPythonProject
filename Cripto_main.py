@@ -84,7 +84,7 @@ else:
 
 if action == "Get main info":
     if st.button("Get Info"):
-        pf.get_crypto_main_info(df_crypto, option_cripto_name)
+        pf.get_crypto_main_info(df_crypto, option_cripto_name, start_date, end_date)
 
 if action == "Plot":
     if st.button("Get Info"):

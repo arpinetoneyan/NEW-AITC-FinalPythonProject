@@ -225,7 +225,7 @@ def fmt_percent(x, dec):
     except Exception:
         return str(x)
 
-def get_crypto_main_info(df, crypto, price_decimals=1, change_decimals=1):
+def get_crypto_main_info(df_main, crypto, start_date, end_date, price_decimals=1, change_decimals=1):
   """
   prints basic info about crypto
   df - dataframe
@@ -233,6 +233,11 @@ def get_crypto_main_info(df, crypto, price_decimals=1, change_decimals=1):
   price_decimals - number of decimals for price
   change_decimals - number of decimals for change
   """
+  start_datetime = datetime.combine(start_date, datetime.min.time())
+  end_datetime = datetime.combine(end_date, datetime.max.time())
+
+  df = df_main[(df_main['timestamp'] >= start_datetime) & (df_main['timestamp'] <= end_datetime)]
+
   crypto_df = df[df['name'] == crypto]
   if crypto_df.empty:
     st.write(f"No data for {crypto!r}")
@@ -323,7 +328,7 @@ def plot_crypto_field(df_main, start_date, end_date, *cryptos, field='price_usd_
 
     return fig
 
-def count_plot_top_n_by_name(df: pd.DataFrame, col: str, n: int):
+def count_plot_top_n_by_name(df: pd.DataFrame, col: str, n: int, color='#1f77b4'):
     """
     Plots Count Plot for top N cryptocurrencies by col by count
     """
@@ -341,7 +346,7 @@ def count_plot_top_n_by_name(df: pd.DataFrame, col: str, n: int):
         data=df[df[col].isin(top_n)],
         y=col,
         order=top_n,
-        color="green",
+        color=color,
         ax=ax
     )
 
